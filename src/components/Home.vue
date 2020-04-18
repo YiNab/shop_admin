@@ -4,18 +4,71 @@
       <div class="logo"></div>
       <div class="logout">
         欢迎光临
-        <a href="javascript:;">退出</a>
+        <a href="javascript:;" v-on:click="logout">退出</a>
       </div>
       <h1 class="title">电商后台管理系统</h1>
     </el-header>
     <el-container>
-      <el-aside width="200px">Aside</el-aside>
+      <el-aside width="200px">
+        <el-menu
+          default-active="1-1"
+          class="el-menu-vertical-demo"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b"
+          unique-opened
+        >
+          <el-submenu index="1">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span>用户管理</span>
+            </template>
+            <el-menu-item index="1-1">
+              <i class="el-icon-menu"></i>
+              <span slot="title">用户列表</span>
+            </el-menu-item>
+          </el-submenu>
+          <el-submenu index="2">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span>权限管理</span>
+            </template>
+            <el-menu-item index="2-1">
+              <i class="el-icon-menu"></i>
+              <span slot="title">角色列表</span>
+            </el-menu-item>
+          </el-submenu>
+        </el-menu>
+      </el-aside>
       <el-main>Main</el-main>
     </el-container>
   </el-container>
 </template>
 <script>
-export default {}
+export default {
+  methods: {
+    logout () {
+      this.$confirm('确定要退出吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 删除token
+        localStorage.removeItem('token')
+        this.$router.push('/login')
+        // 退出成功
+        this.$message({
+          type: 'success',
+          message: '退出成功'
+        })
+        localStorage.removeItem('token')
+        this.$router.push('/login')
+      }).catch(() => {
+        this.$message.error('取消退出操作')
+      })
+    }
+  }
+}
 </script>
 <style lang="less" scope>
 .home {
