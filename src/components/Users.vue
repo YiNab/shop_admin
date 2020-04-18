@@ -16,6 +16,17 @@
       </el-table-column>
     </el-table>
     <!-- 分页布局 -->
+    <div class="block">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[2, 4, 6, 8]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+      ></el-pagination>
+    </div>
   </div>
 </template>
 <script>
@@ -30,26 +41,45 @@ export default {
       users: []
     }
   },
-  created () {
-    axios({
-      method: 'get',
-      url: 'http://localhost:8888/api/private/v1/users',
-      params: {
-        query: this.query,
-        pagenum: this.currentPage,
-        pagesize: this.pageSize
+  methods: {
+    // 获取用户数据
+    getUserList () {
+      axios({
+        method: 'get',
+        url: 'http://localhost:8888/api/private/v1/users',
+        params: {
+          query: this.query,
+          pagenum: this.currentPage,
+          pagesize: this.pageSize
 
-      },
-      headers: {
-        Authorization: localStorage.getItem('token')
-      }
-    }).then((res) => {
-      if (res.data.meta.status === 200) {
-        this.users = res.data.data.users
-        this.total = res.data.data.total
-      }
-      console.log(res.data)
-    })
+        },
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then((res) => {
+        if (res.data.meta.status === 200) {
+          this.users = res.data.data.users
+          this.total = res.data.data.total
+        }
+        console.log(res.data)
+      })
+    },
+    // 每页的条数
+    handleSizeChange (val) {
+      console.log('每页显示的条数', val)
+      this.currentPage = 1
+      this.pageSize = val
+      this.getUserList()
+    },
+    // 点击获取当前页
+    handleCurrentChange (val) {
+      console.log('当前页为', val)
+      this.currentPage = val
+      this.getUserList()
+    }
+  },
+  created () {
+    this.getUserList()
   }
 }
 </script>
