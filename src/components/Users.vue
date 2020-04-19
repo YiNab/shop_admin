@@ -1,12 +1,23 @@
 <template>
   <div class="user">
+    <!-- 面包屑导航 -->
+    <el-breadcrumb separator-class="el-icon-arrow-right">
+      <el-breadcrumb-item :to="{ path: '/' }">用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <!-- 表格内容 -->
     <el-table :data="users" style="width: 100%">
       <el-table-column prop="username" label="姓名" width="180"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
       <el-table-column prop="mobile" label="电话" width="180"></el-table-column>
       <el-table-column prop="mg_state" label="状态" width="180">
         <template slot-scope="scope">
-          <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          <el-switch
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            @change="changeState(scope.row)"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -61,10 +72,10 @@ export default {
           this.users = res.data.data.users
           this.total = res.data.data.total
         }
-        console.log(res.data)
+        // console.log(res.data)
       })
     },
-    // 每页的条数
+    // 每页的显示的条数
     handleSizeChange (val) {
       console.log('每页显示的条数', val)
       this.currentPage = 1
@@ -76,6 +87,26 @@ export default {
       console.log('当前页为', val)
       this.currentPage = val
       this.getUserList()
+    },
+    // 修改用户的状态
+    changeState (user) {
+      // 发送axios请求
+      axios({
+        url: `http://localhost:8888/api/private/v1/users/${user.id}/state/${user.mg_state}`,
+        method: 'put',
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
+        // console.log(res)
+        if (res.data.meta.status === 200) {
+          this.$message.success('状态修改成功')
+        } else {
+          this.$message.error('状态修改失败')
+        }
+      }).catch(err => {
+        console.log('修改失败', err)
+      })
     }
   },
   created () {
@@ -83,3 +114,13 @@ export default {
   }
 }
 </script>
+<style lang="less" scoped>
+.el-breadcrumb {
+  margin-bottom: 10px;
+}
+
+.el-input {
+  width: 400px;
+  margin-bottom: 10px;
+}
+</style>
