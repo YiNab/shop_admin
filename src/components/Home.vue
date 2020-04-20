@@ -64,8 +64,6 @@ export default {
           type: 'success',
           message: '退出成功'
         })
-        localStorage.removeItem('token')
-        this.$router.push('/login')
       }).catch(() => {
         this.$message.error('取消退出操作')
       })

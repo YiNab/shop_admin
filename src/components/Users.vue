@@ -2,7 +2,7 @@
   <div class="user">
     <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: 'users' }">用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 收缩框 -->
@@ -99,7 +99,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 export default {
   data () {
     return {
@@ -146,24 +145,21 @@ export default {
   methods: {
     // 获取用户数据
     getUserList () {
-      axios({
+      this.axios({
         method: 'get',
-        url: 'http://localhost:8888/api/private/v1/users',
+        url: 'users',
         params: {
           query: this.query,
           pagenum: this.currentPage,
           pagesize: this.pageSize
 
-        },
-        headers: {
-          Authorization: localStorage.getItem('token')
         }
       }).then((res) => {
-        if (res.data.meta.status === 200) {
-          this.users = res.data.data.users
-          this.total = res.data.data.total
+        console.log(res)
+        if (res.meta.status === 200) {
+          this.users = res.data.users
+          this.total = res.data.total
         }
-        // console.log(res.data)
       })
     },
     // 每页的显示的条数
@@ -182,15 +178,12 @@ export default {
     // 修改用户的状态
     changeState (user) {
       // 发送axios请求
-      axios({
-        url: `http://localhost:8888/api/private/v1/users/${user.id}/state/${user.mg_state}`,
-        method: 'put',
-        headers: {
-          Authorization: localStorage.getItem('token')
-        }
+      this.axios({
+        url: `users/${user.id}/state/${user.mg_state}`,
+        method: 'put'
       }).then(res => {
         // console.log(res)
-        if (res.data.meta.status === 200) {
+        if (res.meta.status === 200) {
           this.$message.success('状态修改成功')
         } else {
           this.$message.error('状态修改失败')
@@ -213,16 +206,13 @@ export default {
       this.$refs.addForm.validate(valid => {
         if (!valid) return false
         // 成功
-        axios({
-          url: `http://localhost:8888/api/private/v1/users`,
+        this.axios({
+          url: `users`,
           method: 'post',
-          headers: {
-            Authorization: localStorage.getItem('token')
-          },
           data: this.addForm
         }).then(res => {
           console.log(res)
-          if (res.data.meta.status === 201) {
+          if (res.meta.status === 201) {
             this.$message.success('添加成功')
             // 重新渲染最后一页
             this.total++
@@ -253,16 +243,13 @@ export default {
     editUser () {
       this.$refs.editForm.validate(valid => {
         if (!valid) return false
-        axios({
+        this.axios({
           method: 'put',
-          url: `http://localhost:8888/api/private/v1/users/${this.editForm.id}`,
-          data: this.editForm,
-          headers: {
-            Authorization: localStorage.getItem('token')
-          }
+          url: `users/${this.editForm.id}`,
+          data: this.editForm
         }).then(res => {
           console.log(res)
-          if (res.data.meta.status === 200) {
+          if (res.meta.status === 200) {
             this.getUserList()
             this.$message.success('编辑 成功')
             this.$refs.editForm.resetFields()
@@ -278,15 +265,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        return axios({
+        return this.axios({
           method: 'delete',
-          url: `http://localhost:8888/api/private/v1/users/${id}`,
-          headers: {
-            Authorization: localStorage.getItem('token')
-          }
+          url: `users/${id}`
         })
       }).then(res => {
-        if (res.data.meta.status === 200) {
+        if (res.meta.status === 200) {
           if (this.users.length === 1 && this.currentPage > 1) {
             this.currentPage--
           }

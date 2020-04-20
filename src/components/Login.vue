@@ -51,18 +51,18 @@ export default {
         if (valid) {
           // 校验成功
           axios({
-            url: 'http://localhost:8888/api/private/v1/login',
+            url: 'login',
             method: 'post',
             data: this.form
           }).then(res => {
             console.log(res.data)
-            if (res.data.meta.status === 200) {
+            if (res.meta.status === 200) {
               this.$message({
                 message: '恭喜你,登录成功',
                 type: 'success'
               })
               // 存储token
-              localStorage.setItem('token', res.data.data.token)
+              localStorage.setItem('token', res.data.token)
               // 跳转到Home组件中
               this.$router.push('/home')
               console.log(this.$router)
