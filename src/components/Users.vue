@@ -34,7 +34,13 @@
             icon="el-icon-edit"
             @click="editDialogUser(scope.row)"
           ></el-button>
-          <el-button plain type="danger" size="small" icon="el-icon-delete"></el-button>
+          <el-button
+            plain
+            type="danger"
+            size="small"
+            icon="el-icon-delete"
+            @click="delUser(scope.row.id)"
+          ></el-button>
           <el-button plain type="success" size="small" icon="el-icon-check">角色分配</el-button>
         </template>
       </el-table-column>
@@ -263,6 +269,32 @@ export default {
             this.editDialogVisible = false
           }
         })
+      })
+    },
+    // 删除用户
+    delUser (id) {
+      this.$confirm('你确定要删除这个用户吗?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return axios({
+          method: 'delete',
+          url: `http://localhost:8888/api/private/v1/users/${id}`,
+          headers: {
+            Authorization: localStorage.getItem('token')
+          }
+        })
+      }).then(res => {
+        if (res.data.meta.status === 200) {
+          if (this.users.length === 1 && this.currentPage > 1) {
+            this.currentPage--
+          }
+          this.getUserList()
+          this.$message.success('删除成功')
+        }
+      }).catch(() => {
+        this.$message.error('你取消了删除操作')
       })
     }
   },
