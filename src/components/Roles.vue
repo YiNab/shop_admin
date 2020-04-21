@@ -12,6 +12,8 @@
       <!-- 这个一列渲染展开的内容 -->
       <el-table-column type="expand">
         <template slot-scope="scope">
+          <!-- 暂无权限的提示 -->
+          <el-row v-if="scope.row.children.length === 0">暂无权限</el-row>
           <!-- {{scope.row}} -->
           <!-- {{scope.row.children}} -->
           <!-- 先遍历拿到一级权限 -->
@@ -72,7 +74,7 @@ export default {
         method: 'get',
         url: 'roles'
       })
-      console.log(res)
+      // console.log(res)
       let { meta: { status }, data } = res
       if (status === 200) {
         this.roleList = data
