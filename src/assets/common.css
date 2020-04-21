@@ -16,3 +16,9 @@ body {
   height: 100%;
   width: 100%;
 }
+
+/* 面包屑导航公共样式 */
+.el-breadcrumb {
+  height: 30px;
+  line-height: 30px;
+}

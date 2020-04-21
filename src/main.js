@@ -22,7 +22,7 @@ axios.defaults.baseURL = 'http://localhost:8888/api/private/v1/'
 // 响应拦截器:拦截响应
 axios.interceptors.request.use(function (config) {
   // 在发送请求之前做什么
-  console.log('haha,请求被我拦截到了吧', config)
+  // console.log('haha,请求被我拦截到了吧', config)
   config.headers.Authorization = localStorage.getItem('token')
   return config
 }, function (error) {
@@ -32,7 +32,7 @@ axios.interceptors.request.use(function (config) {
 // 添加响应拦截器
 axios.interceptors.response.use(function (res) {
   // 对响应数据做点什么
-  console.log('拦截到了响应', res)
+  // console.log('拦截到了响应', res)
   // 直接返回res.data，对应的就是服务器返回的数据
   return res.data
 }, function (error) {
