@@ -32,30 +32,62 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      :page-size="pageSize"
+      background
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+    ></el-pagination>
   </div>
 </template>
 <script>
 export default {
   data () {
     return {
+      loading: true,
       categoryList: [],
-      loading: true
-
+      currentPage: 1,
+      pageSize: 10,
+      total: 0
     }
   },
-  async created () {
-    let res = await this.axios({
-      method: 'get',
-      url: 'categories',
-      params: {
-        type: 3
+  methods: {
+    async getCategoryList () {
+      this.loading = true
+      // let res = await this.axios.get('categories', {
+      let res = await this.axios.get('categories', {
+        params: {
+          type: 3,
+          pagenum: this.currentPage,
+          pagesize: this.pageSize
+        }
+      })
+      let { meta: { status }, data: { result, total } } = res
+      if (status === 200) {
+        this.categoryList = result
+        this.total = total
+        this.loading = false
       }
-    })
-    let { meta: { satus } } = res
-    console.log(res)
-    if (satus === 200) {
-      this.categoryList = res.data
+      console.log(this.categoryList)
+    },
+    handleSizeChange (val) {
+      this.pageSize = val
+      this.currentPage = 1
+      this.getCategoryList()
+    },
+    handleCurrentChange (val) {
+      this.currentPage = val
+      this.getCategoryList()
     }
+
+  },
+  created () {
+    this.getCategoryList()
   }
 }
 </script>

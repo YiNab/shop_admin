@@ -10,8 +10,16 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 // 导入公共样式
 import '@/assets/common.css'
+
 // 把axios绑定到Vue的原型上
 import axios from 'axios'
+// 导入element-tree-grid插件, 导入的就是一个别人定义好的组件
+import ElTreeGrid from 'element-tree-grid'
+
+// 注册一个全局的组件
+// el-table-tree-column
+// console.log('el-table-tree-column', ElTreeGrid)
+Vue.component(ElTreeGrid.name, ElTreeGrid)
 Vue.prototype.axios = axios
 
 // axios的默认全局配置只适合配置一些不会发生改变的值
