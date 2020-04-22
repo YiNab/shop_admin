@@ -67,8 +67,7 @@ export default {
               this.$router.push('/home')
               console.log(this.$router)
             } else {
-              console.log('登录失败')
-              this.$message.error('登录失败')
+              this.$message.error(res.meta.msg)
             }
           })
         } else {

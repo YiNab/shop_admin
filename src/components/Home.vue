@@ -19,28 +19,14 @@
           unique-opened
           router
         >
-          <el-submenu index="1">
+          <el-submenu v-for="menu in menuList" v-bind:key="menu.id" :index="menu.path">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{menu.authName}}</span>
             </template>
-            <el-menu-item index="users">
-              <i class="el-icon-menu"></i>
-              <span slot="title">用户列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
+            <el-menu-item v-for="item in menu.children" :index="item.path" :key="item.id">
               <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="roles">
-              <i class="el-icon-menu"></i>
-              <span slot="title">角色列表</span>
-            </el-menu-item>
-            <el-menu-item index="rights">
-              <i class="el-icon-menu"></i>
-              <span slot="title">权限列表</span>
+              <span slot="title">{{item.authName}}</span>
             </el-menu-item>
           </el-submenu>
         </el-menu>
@@ -53,6 +39,11 @@
 </template>
 <script>
 export default {
+  data () {
+    return {
+      menuList: []
+    }
+  },
   methods: {
     logout () {
       this.$confirm('确定要退出吗?', '提示', {
@@ -72,6 +63,17 @@ export default {
         this.$message.error('取消退出操作')
       })
     }
+  },
+  async created () {
+    let res = await this.axios.get('menus')
+    let {
+      meta: { status },
+      data
+    } = res
+    if (status === 200) {
+      this.menuList = data
+    }
+    console.log(res)
   }
 }
 </script>

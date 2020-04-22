@@ -10,7 +10,7 @@
     <!-- 显示权限数据的表格 开始 -->
     <template>
       <el-table :data="rightList" style="width: 100%">
-        <el-table-column type="index"></el-table-column>
+        <el-table-column type="index" width="50"></el-table-column>
         <el-table-column label="权限名称" prop="authName"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
         <el-table-column label="层级" prop="level">

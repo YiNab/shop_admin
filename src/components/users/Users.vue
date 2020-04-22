@@ -41,7 +41,13 @@
             icon="el-icon-delete"
             @click="delUser(scope.row.id)"
           ></el-button>
-          <el-button plain type="success" size="small" icon="el-icon-check">角色分配</el-button>
+          <el-button
+            plain
+            type="success"
+            size="small"
+            icon="el-icon-check"
+            @click="showAssignDialog(scope.row)"
+          >角色分配</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -96,6 +102,28 @@
         <el-button type="primary" @click="editUser">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 角色分配对话框 -->
+    <el-dialog title="角色分配" :visible.sync="assignDialogVisible" width="40%">
+      <el-form ref="assignForm" :model="assignForm" :rules="rules" status-icon label-width="80px">
+        <el-form-item label="用户名">
+          <el-tag type="info">{{assignForm.username}}</el-tag>
+        </el-form-item>
+        <el-form-item label="角色列表" prop="rid">
+          <el-select v-model="assignForm.rid" placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="assignDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="assignRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -139,7 +167,15 @@ export default {
         mobile: [
           { pattern: /^1\d{10}$/, message: '请输入正确的手机号', trigger: 'blur' }
         ]
-      }
+      },
+      // 角色分配
+      assignDialogVisible: false,
+      assignForm: {
+        id: '',
+        username: '',
+        rid: ''
+      },
+      roleList: ''
     }
   },
   methods: {
@@ -155,12 +191,25 @@ export default {
 
         }
       }).then((res) => {
-        console.log(res)
+        // console.log(res)
         if (res.meta.status === 200) {
           this.users = res.data.users
           this.total = res.data.total
         }
       })
+    },
+    // 获取角色数据
+    async getRolesList () {
+      let res = await this.axios({
+        method: 'get',
+        url: 'roles'
+      })
+      // console.log(res)
+      let { meta: { status }, data } = res
+      if (status === 200) {
+        this.roleList = data
+        // console.log('查询成功', res)
+      }
     },
     // 每页的显示的条数
     handleSizeChange (val) {
@@ -248,7 +297,7 @@ export default {
           url: `users/${this.editForm.id}`,
           data: this.editForm
         }).then(res => {
-          console.log(res)
+          // console.log(res)
           if (res.meta.status === 200) {
             this.getUserList()
             this.$message.success('编辑 成功')
@@ -280,7 +329,46 @@ export default {
       }).catch(() => {
         this.$message.error('你取消了删除操作')
       })
+    },
+    // 分配角色
+    async showAssignDialog (role) {
+      console.log(role)
+      this.assignDialogVisible = true
+      this.assignForm.id = role.id
+      this.assignForm.username = role.username
+      // 根据用户id获得角色id
+      let res = await this.axios({
+        method: 'get',
+        url: `users/${role.id}`
+      })
+      let { data: { rid }, meta: { status } } = res
+      if (status === 200) {
+        if (rid === -1) {
+          rid = ''
+        }
+      }
+      this.assignForm.rid = rid
+      console.log(res)
+      // 获取角色列表
+      this.getRolesList()
+    },
+    assignRole () {
+      // 表单校验
+      this.$refs.assignForm.validate(async valid => {
+        if (!valid) return false
+        let { id, rid } = this.assignForm
+        let res = await this.axios.put(`users/${id}/role`, {
+          rid
+        })
+        if (res.meta.status === 200) {
+          this.assignDialogVisible = false
+          this.$refs.assignForm.resetFields()
+          this.getUserList()
+          this.$message.success('恭喜你，分配角色成功')
+        }
+      })
     }
+
   },
   created () {
     this.getUserList()
