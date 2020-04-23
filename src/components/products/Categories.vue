@@ -1,6 +1,6 @@
 <template>
   <div class="categories">
-    <el-button type="success">添加分类</el-button>
+    <el-button type="success" @click="showAddDialog">添加分类</el-button>
     <el-table
       v-loading="loading"
       :data="categoryList"
@@ -28,7 +28,13 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button size="small" plain type="primary" icon="el-icon-edit"></el-button>
-          <el-button size="small" plain type="danger" icon="el-icon-delete"></el-button>
+          <el-button
+            size="small"
+            plain
+            type="danger"
+            icon="el-icon-delete"
+            @click="delCategory(scope.row)"
+          ></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -43,6 +49,27 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
+    <!--添加对话框 -->
+    <el-dialog title="添加分类" :visible.sync="addDialogVisible" width="40%">
+      <el-form :model="addForm" :rules="rules" label-width="80px" ref="addForm" status-icon>
+        <el-form-item label="分类名称" prop="cat_name">
+          <el-input v-model="addForm.cat_name"></el-input>
+        </el-form-item>
+        <el-form-item label="父级名称" prop="cat_pid">
+          <el-cascader
+            :options="options"
+            :props="props"
+            v-model="addForm.cat_pid"
+            change-on-select
+            clearable
+          ></el-cascader>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addCategory">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -53,7 +80,24 @@ export default {
       categoryList: [],
       currentPage: 1,
       pageSize: 10,
-      total: 0
+      total: 0,
+      addDialogVisible: false,
+      addForm: {
+        cat_name: '',
+        cat_pid: []
+      },
+      rules: {
+        cat_name: [
+          { required: true, message: '请输入分类的名称', trigger: 'blur' }
+        ]
+      },
+      options: [],
+      // 级联菜单的属性配置
+      props: {
+        value: 'cat_id',
+        label: 'cat_name',
+        children: 'children'
+      }
     }
   },
   methods: {
@@ -73,7 +117,6 @@ export default {
         this.total = total
         this.loading = false
       }
-      console.log(this.categoryList)
     },
     handleSizeChange (val) {
       this.pageSize = val
@@ -83,6 +126,55 @@ export default {
     handleCurrentChange (val) {
       this.currentPage = val
       this.getCategoryList()
+    },
+    // 添加分类对话框
+    async  showAddDialog () {
+      this.addDialogVisible = true
+      // 获取二级分类
+      let res = await this.axios.get('categories?type=2')
+      let { meta: { status }, data } = res
+      if (status === 200) {
+        this.options = data
+      }
+      console.log(res)
+    },
+    addCategory () {
+      this.$refs.addForm.validate(async valid => {
+        if (!valid) return false
+        let { cat_name: catName, cat_pid: catPid } = this.addForm
+        let res = await this.axios.post('categories', {
+          // 注意点,所有的一级分类的pid都是0
+          cat_pid: catPid[catPid.length - 1] || 0,
+          cat_name: catName,
+          cat_level: catPid.length
+        })
+        let { meta: { status } } = res
+        if (status === 201) {
+          this.getCategoryList()
+          this.addDialogVisible = false
+          this.$refs.addForm.resetFields()
+          this.$message.success('添加成功')
+        }
+      })
+    },
+    // 删除操作
+    async delCategory (cats) {
+      console.log(cats)
+      try {
+        await this.$confirm('你确定要删除吗', '温馨提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        let res = await this.axios.delete(`categories/${cats.cat_id}`)
+        let { meta: { status } } = res
+        if (status === 200) {
+          this.getCategoryList()
+          this.$message.success('删除成功')
+        }
+      } catch (e) {
+        this.$message.error('取消删除')
+      }
     }
 
   },
